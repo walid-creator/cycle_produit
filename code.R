@@ -271,6 +271,17 @@ anova(modele1,modele2)
 #on rejette l'hypothèse de non-intéraction entre note qualité et les autres var quali
 #il y' bien un effet des intéractions de la  qualité de l'information sur les variabes quali sur l'mission de gaz
 
+
+
+#régression pls
+#install.packages("pls")
+library(pls)
+Y<-as.matrix(data.frame(newdataset_synthese['score_unique'],axes[2:5,]))
+X<-as.matrix(newdataset_synthese[,c(1,4,5,6,7)])
+modele <- mvr(Y ~ X, method="oscorespls",scale=TRUE)
+
+
+
 #réression quantile
 library(quantreg)
 ?rq
@@ -283,6 +294,7 @@ plot(note_qualite ~ groupe_aliment, data = dataset_synthese1, pch = 16)
 abline(lm(note_qualite ~ groupe_aliment, data = dataset_synthese1), col = "red", lty = 2)
 abline(rq(note_qualite ~ groupe_aliment, data = dataset_synthese1), col = "blue", lty = 2)
 legend("topright", legend = c("lm", "rq"), col = c("red", "blue"), lty = 2)
+
 
 
 
