@@ -23,16 +23,31 @@ head(dataset_synthese)
 #suppression des colonnes inutiles
 dataset_synthese1 <- dataset_synthese[,c(-1,-2,-6,-7,-8)]
 colnames(dataset_synthese1)<-c("groupe_aliment","sgroupe_aliment","produit","livraison","emballage","preparation","note_qualite","score_unique", "CO2","appauvrissement","rayonnement","Formation","Particules","Acidifaction","EutrophisationT","EutrophisationTEau","EutrophisationMarine","UtilisationSol","Ecotoxicité","EpuisementEAu","EpuisementEnergie","EpuisementMinéraux")
-
 #analyse desc de la variable d'intérêt 
 #tab <- dataset_synthese1[, c(1)] 
 #tab_disj <- tab.disjonctif(tab)
-summary(dataset_synthese1['note_qualite'])
-hist(dataset_synthese1$note_qualite)
-#modalité de régérence
+summary(dataset_synthese1['score_unique'])
+hist(dataset_synthese1$score_unique,col='yellow',main='Distribution de la variable note_qualité',xlab='note', ylab='effectif')
+
+summary(dataset_synthese1$score_unique)
+summary(dataset_synthese1$CO2)
+summary(dataset_synthese1$appauvrissement)
+summary(dataset_synthese1$rayonnement)
+summary(dataset_synthese1$Formation)
+summary(dataset_synthese1$Particules)
+summary(dataset_synthese1$Acidifaction)
+summary(dataset_synthese1$EutrophisationT)
+summary(dataset_synthese1$EutrophisationTEau)
+summary(dataset_synthese1$EutrophisationMarine)
+summary(dataset_synthese1$UtilisationSol)
+summary(dataset_synthese1$Ecotoxicité)
+summary(dataset_synthese1$EpuisementEAu)
+summary(dataset_synthese1$EpuisementEnergie)
+summary(dataset_synthese1$EpuisementMinéraux)
+#modalité de référence
 dataset_synthese1$groupe_aliment <- relevel(factor(dataset_synthese1$groupe_aliment), "entrées et plats composés")
 
-#l qualité de l'info pour chaque groupe d'aliment
+#la qualité de l'info pour chaque groupe d'aliment
 reg<-lm(formula = note_qualite ~    groupe_aliment, data = dataset_synthese1)
 summary(reg)
 drop1(reg,.~.,test="F")
@@ -49,23 +64,10 @@ céréaliers <- dataset_synthese1[which(dataset_synthese1$groupe_aliment == 'pro
 laitiers <- dataset_synthese1[which(dataset_synthese1$groupe_aliment == 'lait et produits laitiers' ),] 
 
 
-#hétérogeinéité au sein de chaque groupe d'aliment
-mean(plat_comp$note_qualite)#
-mean(glaces$note_qualite)#
-mean(grasses$note_qualite)#
-mean(sucres$note_qualite)#
-mean(culinaires$note_qualite)#
-mean(boissons$note_qualite)#
-mean(viandes$note_qualite)#
-mean(fruits_leg$note_qualite)#
-mean(infantiles$note_qualite)#
-mean(céréaliers$note_qualite)#
-mean(laitiers$note_qualite)#
-#aucun sous échantillon 
-x<-dataset_synthese1$groupe_aliment
-y<-dataset_synthese1$score_unique
-var.test(x,y)
-?aov
+
+
+
+#test d'anova d'égalité des moyennes de chaque groupe d'aliment
 fit <- aov(score_unique ~ groupe_aliment, data=dataset_synthese1 )
 summary(fit)
 #on a une pvalue  significative, on rejette l'hypothèse d'égalité des moyennes,
@@ -76,28 +78,8 @@ summary(fit)
 library("car")
 qqPlot(newdataset_synthese$score_unique)
 
-#Boxplots non réussi
-boxplot(plat_comp['note_qualite'],col="#FAD4B1") ; 
-split.screen(1:11)
-plot.new() 
-par(mar=c(1,1,1,0)) 
-boxplot(plat_comp['note_qualite'],col="#FAD4B1")
-axis(2) 
-par(new = T) 
-par(mar=c(1,0,1,5)) 
-boxplot(grasses['note_qualite'],col="#FAD4B1")
-axis(4) 
-boxplot(plat_comp['note_qualite'],col="#FAD4B1")
-boxplot(glaces['note_qualite'],col="#FAD4B1")
-boxplot(grasses['note_qualite'],col="#FAD4B1")
-boxplot(sucres['note_qualite'],col="#FAD4B1")
-boxplot(culinaires['note_qualite'],col="#FAD4B1")
-boxplot(boissons['note_qualite'],col="#FAD4B1")
-boxplot(viandes['note_qualite'],col="#FAD4B1")
-boxplot(fruits_leg['note_qualite'],col="#FAD4B1")
-boxplot(infantiles['note_qualite'],col="#FAD4B1")
-boxplot(céréaliers['note_qualite'],col="#FAD4B1")
-boxplot(litiers['note_qualite'],col="#FAD4B1")
+#boxplot de variables quali
+boxplot(newdataset_synthese$score_unique)
 
 
 
@@ -119,22 +101,28 @@ pourc_total<-length(dataset_synthese1[which(dataset_synthese1$note_qualite<=3 ),
 
 
 #faire une ACP sur les différentes émissions de gaz à effet de serres
+
+
+
 outputs <- dataset_synthese1[,9:22]
 acp<-PCA(outputs, scale.unit = TRUE, graph = TRUE)
 print(acp)
 print(acp$eig)
 
+
+?HSBC()
 #contribution d'une variable  à un axe
 #on garde les individus qui ont une contribution supérieure à la contribution
 #moyenne 1/n
 acp$var$contrib
-contr_ind<-data.frame(acp$ind$contrib,newdataset_synthese["groupe_aliment"],newdataset_synthese["sgroupe_aliment"],newdataset_synthese["produit"])
+contr_ind<-data.frame(acp$ind$contrib,dataset_synthese1["groupe_aliment"],dataset_synthese1["sgroupe_aliment"],dataset_synthese1["produit"])
 contr_ind_axe1 <- contr_ind[which(contr_ind$Dim.1>1/2480),c(1,6,7,8)]
 contr_ind_axe2 <- contr_ind[which(contr_ind$Dim.2>1/2480),c(2,6,7,8)]
 contr_ind_axe3 <- contr_ind[which(contr_ind$Dim.3>1/2480),c(3,6,7,8)]
 contr_ind_axe4 <- contr_ind[which(contr_ind$Dim.4>1/2480),c(4,6,7,8)]
 contr_ind_axe5 <- contr_ind[which(contr_ind$Dim.5>1/2480),c(5,6,7,8)]
 
+#effectif de chaque groupe d'aliment 
 x<-data.frame(table(contr_ind$groupe_aliment))
 
 x1<-data.frame(table(contr_ind_axe1$groupe_aliment))
@@ -159,10 +147,105 @@ axes<-acp$ind$coord
 
 colnames(axes) <- c("axe1","axe2","axe3","axe4","axe5")
 axes <- as.data.frame(axes)
+#data.frame(newdataset_synthese['score_unique'],axes[,2:5])
 
 
 
-#corrélation entre le Score unique EF et l'émission des autres gaezs à effet de serre
+
+library("FactoMineR")
+library("factoextra")
+
+
+#par défaut la fonction pca garde les 5 premières composantes de l'ACP
+#c'est exactement le nbre de variables cibles qu'on a gardé 
+
+set.seed(123)
+cah <- HCPC (acp, graph = T )
+set.seed(123)
+classe<-cah$data.clust
+cah$desc.axes
+print(table(classe$clust))
+cah$desc.var
+#les ind les plus représentatifs de chque cluster
+cah$desc.ind$para# la distance au centre de chaque indiv de chaque cluster
+#les var quanti représentant le plus chaque cluster
+cah$desc.var
+
+
+
+cah$desc.ind
+cah$desc.axes
+
+plot(cah,choice="tree")
+plot(cah,choice="map", draw.tree=FALSE)
+plot(cah,choice="3D.map", axes = c(1,2), title = "Représentation des individus sur le premier plan factoriel")
+plot(cah,choice="3D.map", axes = c(3,4), title = "Représentation des individus sur le deuxième plan factoriel" )
+
+groupe1 <-  classe[which(classe$clust=='1'), ]
+groupe2 <-  classe[which(classe$clust=='2'), ]
+groupe3 <-  classe[which(classe$clust=='3'), ]
+
+
+
+#Analyse des produits de chqaue groupes
+#groupe1
+dataset_synthese1[c(1464, 275, 2037, 384, 518, 2238, 2239, 2339, 2340, 2341), ]$groupe_aliment
+dataset_synthese1[c(1464, 275, 2037, 384, 518, 2238, 2239, 2339, 2340, 2341), ]$produit
+dataset_synthese1[c(1464, 275, 2037, 384, 518, 2238, 2239, 2339, 2340, 2341), ]$livraison
+dataset_synthese1[c(1464, 275, 2037, 384, 518, 2238, 2239, 2339, 2340, 2341), ]$emballage
+dataset_synthese1[c(1464, 275, 2037, 384, 518, 2238, 2239, 2339, 2340, 2341), ]$preparation
+
+#groupe2
+dataset_synthese1[c(85, 87, 89, 90, 320, 706, 1621, 630, 1523, 1702), ]$groupe_aliment
+dataset_synthese1[c(85, 87, 89, 90, 320, 706, 1621, 630, 1523, 1702), ]$produit
+dataset_synthese1[c(85, 87, 89, 90, 320, 706, 1621, 630, 1523, 1702), ]$livraison
+dataset_synthese1[c(85, 87, 89, 90, 320, 706, 1621, 630, 1523, 1702), ]$emballage
+dataset_synthese1[c(85, 87, 89, 90, 320, 706, 1621, 630, 1523, 1702), ]$preparation
+
+#groupe3
+dataset_synthese1[c(453, 568, 923, 2010, 229, 15, 24, 27, 478, 13), ]$groupe_aliment
+dataset_synthese1[c(453, 568, 923, 2010, 229, 15, 24, 27, 478, 13), ]$produit
+dataset_synthese1[c(453, 568, 923, 2010, 229, 15, 24, 27, 478, 13), ]$livraison
+dataset_synthese1[c(453, 568, 923, 2010, 229, 15, 24, 27, 478, 13), ]$emballage
+dataset_synthese1[c(453, 568, 923, 2010, 229, 15, 24, 27, 478, 13), ]$preparation
+
+
+
+
+?plot
+
+wss<-c()
+for (k in 1:10){
+  tmp <- kmeans(axes, centers=k)
+  wss[k] <- tmp$betweenss/tmp$totss}
+#prin(wss)
+
+plot(x=c(1:10), y=wss, pch=20, type="b", xlab="Nombres de groupes", ylab="Rapport de l'inertie inter-classe et l'inertie totale", main= "Technique du coude pour optimiser le nombre de classes" )
+
+?plot
+
+groupes.kmeans <- kmeans(axes,centers=3)
+
+#les centres de chaque cluster
+print(groupes.kmeans$centers)
+
+#effectifs par clusters
+print(table(groupes.kmeans$cluster))
+
+pairs(axes)
+#moyenne de chaque cluster
+print(colMeans(axes))
+#calcul des écrts types
+#on veut que les variables aient la même variance c'est pour c qu'on doit réduire dans le cs opù on travaille vec ds données bruts, il faut que les variables aient la même importance 
+apply(axes, 2, sd)# 2: 2eme dimension (écart type par colonne)
+pairs(axes, col=c('green', 'blue', 'black', 'red', 'yellow')[groupes.kmeans$cluster] )
+
+print(aggregate(x = axes, by = list(groupes.kmeans$cluster), FUN = mean))
+
+
+
+
+#corrélation entre le Score unique EF et l'émission des autres gazs à effet de serre
 cor(dataset_synthese1$score_unique , axes$axe1, method = c("pearson", "kendall", "spearman"))#0.99
 cor(dataset_synthese1$score_unique , axes$axe2, method = c("pearson", "kendall", "spearman"))#0.01
 cor(dataset_synthese1$score_unique , axes$axe3, method = c("pearson", "kendall", "spearman"))#0.11
@@ -173,7 +256,7 @@ cor(dataset_synthese1$score_unique , axes$axe5, method = c("pearson", "kendall",
 newdataset_synthese <- data.frame(dataset_synthese1[,1:8],axes[,2:5])
 colnames(newdataset_synthese)<-c("groupe_aliment","sgroupe_aliment","produit","livraison","emballage","preparation","note_qualite","score_unique","axe2","axe3","axe4","axe5")
 
-#stat des de la variab§les score_unique
+#stat des de la variables score_unique
 summary(newdataset_synthese["score_unique"])
 boxplot(newdataset_synthese["score_unique"])
 hist(newdataset_synthese$score_unique)
@@ -182,7 +265,7 @@ porc_out
 # ils représentent 8% de l'effectif total, on les supprime 
 #newdataset_synthese <- droplevels(newdataset_synthese[-which(newdataset_synthese$score_unique > 2), ] )
 
-#test de normlité
+#test de normalité
 shapiro.test(newdataset_synthese$score_unique)
 
 #centrer et réduire la variable cible pour s'approcher plus d'une loi normale et valider les hypothèses du modèle inéaire 
@@ -252,7 +335,18 @@ print(length(newdataset_synthese$preparation[newdataset_synthese$preparation == 
 
 score_unique_microOnde<-dataset_synthese1[which(dataset_synthese1$preparation=="Micro onde"),c(1,3,8)]
 summary(score_unique_microOnde)
-#régressions
+
+
+
+
+
+#traitement sur variables explicatives
+newdataset_synthese$emballage[which(newdataset_synthese$emballage=="Bouteille PET")]<-'Bouteille PET/PETE' 
+newdataset_synthese$emballage[which(newdataset_synthese$emballage=="Bouteille PETE")]<-'Bouteille PET/PETE'
+newdataset_synthese$emballage[which(newdataset_synthese$emballage=="Déjà emballé - PET")]<-'Bouteille PET/PETE'
+
+
+
 
 #régression avec modèle linéaire multiple
 modele1<-lm(formula = score_unique ~  note_qualite + groupe_aliment + livraison + emballage + preparation  , data=newdataset_synthese )
@@ -273,13 +367,27 @@ anova(modele1,modele2)
 
 
 
+
+
+
+
+
+
+#modélisations
+
 #régression pls
 #install.packages("pls")
 library(pls)
-Y<-as.matrix(data.frame(newdataset_synthese['score_unique'],axes[2:5,]))
-X<-as.matrix(newdataset_synthese[,c(1,4,5,6,7)])
-modele <- mvr(Y ~ X, method="oscorespls",scale=TRUE)
-
+Y<-as.matrix(data.frame(newdataset_synthese['score_unique'],axes[,2:5]))
+X<-newdataset_synthese[,c(1,4,5,6,7)]
+#install.packages('fastDummies')
+X1 <- fastDummies::dummy_cols(X[,c(1,2,3,4)])
+X<-as.matrix(data.frame(X1[,5:47],scale(X[,5])))
+modele <- mvr(Y ~ X, method="oscorespls",ncomp=5)
+validationplot(modele, val.type= 'MSE')
+summary(modele)
+print(coef(modele))
+?validationplot
 
 
 #réression quantile
@@ -288,14 +396,42 @@ library(quantreg)
 help.start()
 # un exemple
 example(rq)
-rqfit <- rq(score_unique ~ note_qualite + groupe_aliment + livraison + emballage + preparation  ,tau=c(.05, .25, .5, .75, .95), data=newdataset_synthese)
-summary(rqfit,se = "boot")
+
+newdataset_synthese$groupe_aliment <- relevel(factor(newdataset_synthese$groupe_aliment), "produits sucrés")
+set.seed(1)
+#traitement de la variable emballage
+newdataset_synthese[which(dataset_synthese1$emballage == 'Bouteille PET' ),] <-'Bouteille PET/PETE'
+newdataset_synthese[which(dataset_synthese1$emballage == 'Bouteille PETE' ),] <-'Bouteille PET/PETE'
+newdataset_synthese[which(dataset_synthese1$emballage == 'Déjà emballé - PET' ),] <-'Bouteille PET/PETE'
+
+
+
+
+rqfit1 <- rq(score_unique ~ groupe_aliment + livraison + emballage + preparation  ,tau=c(.5, .99), data=newdataset_synthese)
+#dataset_synthese1$groupe_aliment <- relevel(factor(dataset_synthese1$groupe_aliment), "entrées et plats composés")
+summary(rqfit1,se = "boot")
+
 plot(note_qualite ~ groupe_aliment, data = dataset_synthese1, pch = 16)
 abline(lm(note_qualite ~ groupe_aliment, data = dataset_synthese1), col = "red", lty = 2)
 abline(rq(note_qualite ~ groupe_aliment, data = dataset_synthese1), col = "blue", lty = 2)
 legend("topright", legend = c("lm", "rq"), col = c("red", "blue"), lty = 2)
+?summary.rq
 
+rqfit2 <- rq(axe2 ~ groupe_aliment + livraison + emballage + preparation  ,tau=c(.05, .25, .5, .75, .95), data=newdataset_synthese)
+#dataset_synthese1$groupe_aliment <- relevel(factor(dataset_synthese1$groupe_aliment), "entrées et plats composés")
+summary(rqfit2,se = "boot")
 
+rqfit3 <- rq(axe3 ~ groupe_aliment + livraison + emballage + preparation  ,tau=c(.05, .25, .5, .75, .95), data=newdataset_synthese)
+#dataset_synthese1$groupe_aliment <- relevel(factor(dataset_synthese1$groupe_aliment), "entrées et plats composés")
+summary(rqfit3,se = "boot")
+
+rqfit4 <- rq(axe4 ~ groupe_aliment + livraison + emballage + preparation  ,tau=c(.05, .25, .5, .75, .95), data=newdataset_synthese)
+#dataset_synthese1$groupe_aliment <- relevel(factor(dataset_synthese1$groupe_aliment), "entrées et plats composés")
+summary(rqfit4,se = "boot")
+
+rqfit5 <- rq(axe5 ~ groupe_aliment + livraison + emballage + preparation  ,tau=c(.05, .25, .5, .75, .95), data=newdataset_synthese)
+#dataset_synthese1$groupe_aliment <- relevel(factor(dataset_synthese1$groupe_aliment), "entrées et plats composés")
+summary(rqfit5,se = "boot")
 
 
 #données 2
