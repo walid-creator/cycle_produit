@@ -101,7 +101,7 @@ print(acp)
 print(acp$eig)
 
 
-?HSBC()
+
 #contribution d'une variable  à un axe
 #on garde les individus qui ont une contribution supérieure à la contribution
 #moyenne 1/n
@@ -171,16 +171,15 @@ fviz_contrib(acp, choice = "var", axes = 5, top = 10)
 
 set.seed(123)
 cah <- HCPC (acp, graph = T ,nb.par=20,nb.clust=3)
-?HCPC
 set.seed(123)
 classe<-cah$data.clust
 #les axes qui représentent le plus chaque cluster
 cah$desc.axes
 print(table(classe$clust))
 #les ind les plus représentatifs de chaque cluster
-g1<-dataset_synthese1[as.numeric(rownames(data.frame(cah$desc.ind$para$'1'))),]# le min des distances de chaque indiv du centre  de chaque cluster
-g2<-dataset_synthese1[as.numeric(rownames(data.frame(cah$desc.ind$para$'2'))),]
-g3<-dataset_synthese1[as.numeric(rownames(data.frame(cah$desc.ind$para$'3'))),]
+g1<-dataset_synthese1[as.numeric(rownames(data.frame(cah$desc.ind$para$'1'))),c(1,2,3)]# le min des distances de chaque indiv du centre  de chaque cluster
+g2<-dataset_synthese1[as.numeric(rownames(data.frame(cah$desc.ind$para$'2'))),c(1,2,3)]
+g3<-dataset_synthese1[as.numeric(rownames(data.frame(cah$desc.ind$para$'3'))),c(1,2,3)]
 
 
 cah$desc.ind$dist# le max des distances de chaque indiv du centre des autres clusters
@@ -214,17 +213,14 @@ clust3<-data.frame(cah$desc.var$quanti$'3',n3,ntot)
 
 
   
-
+# une représentation plus élégante
 plot(cah,choice="tree")
 plot(cah,choice="map", draw.tree=FALSE)
 plot(cah,choice="3D.map", axes = c(1,2), title = "Représentation des individus sur le premier plan factoriel")
 plot(cah,choice="3D.map", axes = c(3,4), title = "Représentation des individus sur le deuxième plan factoriel" )
 
 groupe_tot <- data.frame(classe,dataset_synthese1$groupe_aliment) 
-#pourcentage de chaque groupe
-length(groupe1$groupe_aliment)/length(groupe_tot$groupe_aliment)
-length(groupe2$groupe_aliment)/length(groupe_tot$groupe_aliment)
-length(groupe3$groupe_aliment)/length(groupe_tot$groupe_aliment)
+
 
 #recosntruction des 3 groupes
 
@@ -241,15 +237,95 @@ colnames(groupe1)[18]<-"produit"
 colnames(groupe2)[18]<-"produit"
 colnames(groupe3)[18]<-"produit"
 
+#porcentage de chaque type_aliment dans chaque groupe
+prop.table(table(groupe1$groupe_aliment))
+prop.table(table(groupe2$groupe_aliment))
+prop.table(table(groupe3$groupe_aliment))
+
+#types de viandes de chaque groupe
+groupe1_viande <- data.frame(groupe1[which(groupe1$groupe_aliment=='viandes, œufs, poissons'),c(16,17,18) ] )
+groupe1_boisson <- data.frame(groupe1[which(groupe1$groupe_aliment=='boissons'),c(16,17,18) ] )
+groupe1_entree <- data.frame(groupe1[which(groupe1$groupe_aliment=='entrées et plats composés'),c(16,17,18) ] )
+
+
+groupe2_viande <- data.frame(groupe2[which(groupe2$groupe_aliment=='viandes, œufs, poissons'),c(16,17,18) ] )
+groupe2_boisson <- data.frame(groupe2[which(groupe2$groupe_aliment=='boissons'),c(16,17,18) ] )
+groupe2_entree <- data.frame(groupe2[which(groupe2$groupe_aliment=='entrées et plats composés'),c(16,17,18) ] )
+groupe2_boisson$produit
+
+groupe3_viande <- data.frame(groupe3[which(groupe3$groupe_aliment=='viandes, œufs, poissons'),c(16,17,18) ] )
+groupe3_boisson <- data.frame(groupe3[which(groupe3$groupe_aliment=='boissons'),c(16,17,18) ] )
+groupe3_entree <- data.frame(groupe3[which(groupe3$groupe_aliment=='entrées et plats composés'),c(16,17,18) ] )
+groupe3_boisson$produit
+
+#pourcentage des sous groupe d'aliments dans chaque groupe d'aliment dans chaque groupe de LA cah
+taux_gr1_viande <- data.frame(prop.table(table(groupe1_viande$sgroupe_aliment)))
+colnames(taux_gr1_viande)[1] <- "Type_aliment"
+colnames(taux_gr1_viande)[2] <- "taux"
+taux_gr1_viande[1,2] <- taux_gr1_viande[1,2] + taux_gr1_viande[9,2] + taux_gr1_viande [10,2] 
+taux_gr1_viande[3,2] <- taux_gr1_viande[3,2] + taux_gr1_viande [4,2] 
+taux_gr1_viande[6,2] <- taux_gr1_viande[6,2] + taux_gr1_viande[7,2] + taux_gr1_viande [8,2] 
+taux_gr1_viande <- taux_gr1_viande[c(-4,-7,-8,-9, -10),]
+taux_gr1_viande["Type_aliment"] <- c("Viandes","Charcuterie","Mollusques et crustacés","Oeufs", "Poissons")
+taux_gr1_viande[,2] <- taux_gr1_viande[,2]*100
+
+taux_gr2_viande <- data.frame(prop.table(table(groupe2_viande$sgroupe_aliment)))
+colnames(taux_gr2_viande)[1] <- "Type_aliment"
+colnames(taux_gr2_viande)[2] <- "taux"
+taux_gr2_viande[1,2] <- taux_gr2_viande[1,2] + taux_gr2_viande[8,2] + taux_gr2_viande [9,2] 
+taux_gr2_viande[3,2] <- taux_gr2_viande[3,2] + taux_gr2_viande [4,2] 
+taux_gr2_viande[5,2] <- taux_gr2_viande[5,2] + taux_gr2_viande[6,2] + taux_gr2_viande [7,2] 
+taux_gr2_viande <- taux_gr2_viande[c(-4,-6,-7,-8,-9),]
+taux_gr2_viande["Type_aliment"] <- c("Viandes","Charcuterie","Mollusques et crustacés", "Poissons")
+taux_gr2_viande[,2] <- taux_gr2_viande[,2]*100
+
+taux_gr3_viande <- data.frame(prop.table(table(groupe3_viande$sgroupe_aliment)))
+colnames(taux_gr3_viande)[1] <- "Type_aliment"
+colnames(taux_gr3_viande)[2] <- "taux"
+taux_gr3_viande[1,2] <- taux_gr3_viande[1,2] + taux_gr3_viande[3,2] + taux_gr3_viande [4,2]
+taux_gr3_viande <- taux_gr3_viande[c(-3,-4),]
+taux_gr3_viande["Type_aliment"] <- c("Viandes","Charcuterie")
+taux_gr3_viande[,2] <- taux_gr3_viande[,2]*100
 
 
 
-#les numéros d'individus de chaque cluster et ainsi récupérer les groupes de chaque cluster
-g1<-dataset_synthese1[as.numeric(rownames(data.frame(classe[which(classe$clust=='1'), ]))),]
-boxplot()
-g2<-dataset_synthese1[as.numeric(rownames(data.frame(classe[which(classe$clust=='2'), ]))),]
-g3<-dataset_synthese1[as.numeric(rownames(data.frame(classe[which(classe$clust=='3'), ]))),]
-              
+taux_gr1_boisson <- data.frame(prop.table(table(groupe1_boisson$sgroupe_aliment)))
+colnames(taux_gr1_boisson)[1] <- "Type_aliment"
+colnames(taux_gr1_boisson)[2] <- "taux"
+taux_gr1_boisson[,2] <- taux_gr1_boisson[,2]*100
+
+
+taux_gr2_boisson <- data.frame(prop.table(table(groupe2_boisson$sgroupe_aliment)))
+colnames(taux_gr2_boisson)[1] <- "Type_aliment"
+colnames(taux_gr2_boisson)[2] <- "taux"
+taux_gr2_boisson[,2] <- taux_gr2_boisson[,2]*100
+
+taux_gr3_boisson <- data.frame(prop.table(table(groupe3_boisson$sgroupe_aliment)))
+colnames(taux_gr3_boisson)[1] <- "Type_aliment"
+colnames(taux_gr3_boisson)[2] <- "taux"
+taux_gr3_boisson[,2] <- taux_gr3_boisson[,2]*100
+
+#les entrées et plats composées
+taux_gr1_entree <- data.frame(prop.table(table(groupe1_entree$sgroupe_aliment)))
+colnames(taux_gr1_entree)[1] <- "Type_aliment"
+colnames(taux_gr1_entree)[2] <- "taux"
+taux_gr1_entree[,2] <- taux_gr1_entree[,2]*100
+
+taux_gr2_entree <- data.frame(prop.table(table(groupe2_entree$sgroupe_aliment)))
+colnames(taux_gr2_entree)[1] <- "Type_aliment"
+colnames(taux_gr2_entree)[2] <- "taux"
+taux_gr2_entree[,2] <- taux_gr2_entree[,2]*100
+
+taux_gr3_entree <- data.frame(prop.table(table(groupe3_entree$sgroupe_aliment)))
+colnames(taux_gr3_entree)[1] <- "Type_aliment"
+colnames(taux_gr3_entree)[2] <- "taux"
+taux_gr3_entree[,2] <- taux_gr3_entree[,2]*100
+
+
+
+
+
+
 
 
 
@@ -275,9 +351,6 @@ part_total["groupe 1"] <- part_total["groupe 1"] /  eff["effectif"]
 part_total["groupe 2"] <- part_total["groupe 2"] /  eff["effectif"]
 part_total["groupe 3"] <- part_total["groupe 3"] /  eff["effectif"]
 
-f3<-factor(eff)
-fct_infreq(factor(eff))
-#à voir comment faire pour le placer de facon décroissante
 
 
 
@@ -293,7 +366,7 @@ for (k in 1:10){
 
 plot(x=c(1:10), y=wss, pch=20, type="b", xlab="Nombres de groupes", ylab="Rapport de l'inertie inter-classe et l'inertie totale", main= "Technique du coude pour optimiser le nombre de classes" )
 
-?plot
+
 
 groupes.kmeans <- kmeans(axes_acp,centers=7)
 
@@ -303,18 +376,16 @@ print(groupes.kmeans$centers)
 #effectifs par clusters
 print(table(groupes.kmeans$cluster))
 
-#les pairs de nuages de point
+#les pairs de nuages de point des axes
 pairs(axes)
 #moyenne de chaque cluster
 print(colMeans(axes))
-#calcul des écrts types
+#calcul des écarts types
 #on veut que les variables aient la même variance c'est pour c qu'on doit réduire dans le cs opù on travaille vec ds données bruts, il faut que les variables aient la même importance 
 apply(axes_acp, 2, sd)# 2: 2eme dimension (écart type par colonne)
 pairs(axes_acp, col=c('green', 'blue', 'black')[groupes.kmeans$cluster] )
 
 print(aggregate(x = axes, by = list(groupes.kmeans$cluster), FUN = mean))
-
-
 
 
 #corrélation entre le Score unique EF et l'émission des autres gazs à effet de serre
@@ -366,55 +437,6 @@ print(levels(as.factor(newdataset_synthese$livraison)))
 print(levels(as.factor(newdataset_synthese$emballage)))
 print(levels(as.factor(newdataset_synthese$preparation)))
 
-#pourcentage de chaque températures 
-print(length(newdataset_synthese$livraison[newdataset_synthese$livraison == "Congelé"])/length(newdataset_synthese$livraison))
-print(length(newdataset_synthese$livraison[newdataset_synthese$livraison == "Glacé"])/length(newdataset_synthese$livraison))
-print(length(newdataset_synthese$livraison[newdataset_synthese$livraison == "Ambiant (court)"])/length(newdataset_synthese$livraison))
-print(length(newdataset_synthese$livraison[newdataset_synthese$livraison == "Ambiant (long)"])/length(newdataset_synthese$livraison))
-print(length(newdataset_synthese$livraison[newdataset_synthese$livraison == "Ambiant (moyenne)"])/length(newdataset_synthese$livraison))
-
-#pourcentage de chaque type d'emballlage
-print(length(newdataset_synthese$emballage[newdataset_synthese$emballage == "Acier"])/length(newdataset_synthese$emballage))#0.04
-print(length(newdataset_synthese$emballage[newdataset_synthese$emballage == "Aluminium"])/length(newdataset_synthese$emballage))#0.0004
-print(length(newdataset_synthese$emballage[newdataset_synthese$emballage == "Bouteille PET"])/length(newdataset_synthese$emballage))#0.0004
-print(length(newdataset_synthese$emballage[newdataset_synthese$emballage == "Bouteille PETE"])/length(newdataset_synthese$emballage))#0.027
-print(length(newdataset_synthese$emballage[newdataset_synthese$emballage == "Carton"])/length(newdataset_synthese$emballage))#0.12
-print(length(newdataset_synthese$emballage[newdataset_synthese$emballage == "Déjà emballé - Aluminium"])/length(newdataset_synthese$emballage))#0.006
-print(length(newdataset_synthese$emballage[newdataset_synthese$emballage == "Déjà emballé - LDPE"])/length(newdataset_synthese$emballage))#0.0028
-print(length(newdataset_synthese$emballage[newdataset_synthese$emballage == "Déjà emballé - PET"])/length(newdataset_synthese$emballage))#0.0625
-print(length(newdataset_synthese$emballage[newdataset_synthese$emballage == "Déjà emballé - PP/PE"])/length(newdataset_synthese$emballage))#0.01
-print(length(newdataset_synthese$emballage[newdataset_synthese$emballage == "Déjà emballé - Verre"])/length(newdataset_synthese$emballage))#0.0056
-print(length(newdataset_synthese$emballage[newdataset_synthese$emballage == "HPDE"])/length(newdataset_synthese$emballage))#0.0125
-print(length(newdataset_synthese$emballage[newdataset_synthese$emballage == "LPDE"])/length(newdataset_synthese$emballage))#0.19
-print(length(newdataset_synthese$emballage[newdataset_synthese$emballage == "Papier"])/length(newdataset_synthese$emballage))#0.014
-print(length(newdataset_synthese$emballage[newdataset_synthese$emballage == "Pas d'emballage"])/length(newdataset_synthese$emballage))#0.063
-print(length(newdataset_synthese$emballage[newdataset_synthese$emballage == "PP"])/length(newdataset_synthese$emballage))#0.156
-print(length(newdataset_synthese$emballage[newdataset_synthese$emballage == "PS"])/length(newdataset_synthese$emballage))#0.208
-print(length(newdataset_synthese$emballage[newdataset_synthese$emballage == "PVC"])/length(newdataset_synthese$emballage))#0.0004
-print(length(newdataset_synthese$emballage[newdataset_synthese$emballage == "V (PVC)"])/length(newdataset_synthese$emballage))#0.0326
-print(length(newdataset_synthese$emballage[newdataset_synthese$emballage == "Verre"])/length(newdataset_synthese$emballage))#0.037
-
-#pourcentage de chaque type de preparation
-print(length(newdataset_synthese$preparation[newdataset_synthese$preparation == "Bouilli"])/length(newdataset_synthese$preparation))#0.013
-print(length(newdataset_synthese$preparation[newdataset_synthese$preparation == "Cuisson à l'eau"])/length(newdataset_synthese$preparation))#0.031
-print(length(newdataset_synthese$preparation[newdataset_synthese$preparation == "Four"])/length(newdataset_synthese$preparation))#0.122
-print(length(newdataset_synthese$preparation[newdataset_synthese$preparation == "Friture"])/length(newdataset_synthese$preparation))#0.0004
-print(length(newdataset_synthese$preparation[newdataset_synthese$preparation == "Micro onde"])/length(newdataset_synthese$preparation))#0.11
-print(length(newdataset_synthese$preparation[newdataset_synthese$preparation == "Pas de préparation"])/length(newdataset_synthese$preparation))#0.68
-print(length(newdataset_synthese$preparation[newdataset_synthese$preparation == "Poêle"])/length(newdataset_synthese$preparation))#0.015
-print(length(newdataset_synthese$preparation[newdataset_synthese$preparation == "Réfrigéré chez le consommateur"])/length(newdataset_synthese$preparation))#0.023
-
-score_unique_microOnde<-dataset_synthese1[which(dataset_synthese1$preparation=="Micro onde"),c(1,3,8)]
-summary(score_unique_microOnde)
-
-
-
-
-
-#traitement sur variables explicatives
-newdataset_synthese$emballage[which(newdataset_synthese$emballage=="Bouteille PET")]<-'Bouteille PET/PETE' 
-newdataset_synthese$emballage[which(newdataset_synthese$emballage=="Bouteille PETE")]<-'Bouteille PET/PETE'
-newdataset_synthese$emballage[which(newdataset_synthese$emballage=="Déjà emballé - PET")]<-'Bouteille PET/PETE'
 
 
 
@@ -423,22 +445,5 @@ newdataset_synthese$emballage[which(newdataset_synthese$emballage=="Déjà embal
 #outputs <- read_ods ("outputs.ods")
 #axes_acp <- read_ods("axes_acp.ods")
 
-#récupération des produits de chaque cluster
-groupe1 <- read_ods('produit_groupe1.ods')
-groupe2 <- read_ods('produit_groupe2.ods')
-groupe3 <- read_ods('produit_groupe3.ods')
-
-
-#les viandes de chaque cluster
-viandes_gr1 <- data.frame(groupe1[which(groupe1$groupe_aliment=='viandes, œufs, poissons'),c(17,18)])
-viandes_gr2 <- data.frame(groupe2[which(groupe2$groupe_aliment=='viandes, œufs, poissons'),c(17,18)])
-viandes_gr3 <- data.frame(groupe3[which(groupe3$groupe_aliment=='viandes, œufs, poissons'),c(17,18)])
-viande<-data.frame(newdataset_synthese[which(newdataset_synthese$groupe_aliment=='viandes, œufs, poissons'),])
-viande1<-data.frame(dataset_synthese1[which(dataset_synthese1$groupe_aliment=='viandes, œufs, poissons'),])
-#pourcentage de chaque groupe d'aliment dans chaque groupe
-gr2<-data.frame(table(groupe2["groupe_aliment"]))
-gr2<-data.frame(gr2$Var1,gr2['Freq']/sum(gr2['Freq']))
-gr3<-data.frame(table(groupe3["groupe_aliment"]))
-gr3<-data.frame(gr3$Var1,gr3['Freq']/sum(gr3['Freq']))
 
 
