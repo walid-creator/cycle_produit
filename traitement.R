@@ -1,5 +1,5 @@
 rm(list=ls())
-setwd("~/dcma")
+setwd("~/dcma") 
 #install.packages('readODS')
 #install.packages("tidyverse")
 #install.packages(c("FactoMineR", "factoextra"))
