@@ -5,7 +5,7 @@ setwd("~/dcma")
 #install.packages(c("FactoMineR", "factoextra"))
 #install.packages("quantreg")
 
-#libraries
+#libraries##
 library(readODS)
 library(readxl)
 library("FactoMineR")
